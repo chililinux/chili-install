@@ -9,7 +9,7 @@
 #  Chili GNU/Linux - https://chilios.com.br
 #
 #  Created: 2019/04/05 - 23:02 -04
-#  Altered: 2024/12/05 - 12:05 -04
+#  Altered: 2024/12/06 - 12:24 -04
 #
 #  Copyright (c) 2019-2024, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -4542,8 +4542,8 @@ sh_copyfilesboot() {
 
   isArchLike=$([[ "$id_like" == "arch" ]] && echo true || echo false)
   if $isArchLike && $liveOS; then
-    bootmnt="/run/miso/bootmnt/boot"
-	  airootfs="/run/miso/bootmnt/boot"
+    #bootmnt="/boot"
+	  #airootfs="/run/miso/bootmnt/boot"
     sh_cmd_job "Aguarde, copiando kernel e initrd" "cp -Rpva $bootmnt/* $dir_install/boot/" "$err_not_fatal"
 		sh_chroot_job "Aguarde, gerando initrd" "mkinitcpio -P" "$err_not_fatal"
 		sh_chroot_job "Aguarde, atualizando grub" "update-grub" "$err_not_fatal"
