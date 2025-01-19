@@ -1,3 +1,3 @@
-# chili-void-install
+# chili-install
 
 Instalador para o Chili Linux
