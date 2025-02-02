@@ -177,6 +177,8 @@ sh_confDistro() {
 		Adistro+=([cdistro]='Mint' [chost]="${xdistro}live" [ptcom]='.com' [calias]="$xdistro" [cnick]="$xdistro" [cliveuser]="$xdistro" [cgroups]='audio,video,users')
 	elif [[ "$xdistro" = @(chili|chililinux) ]]; then
 		Adistro+=([cdistro]='Chili' [chost]="chililinux" [ptcom]='.com' [calias]="chili" [cnick]="chili" [cliveuser]="live" [cgroups]='wheel,audio,video,users')
+  elif [[ "$xdistro" = @(bigcommunity|communitybig) ]]; then
+    Adistro+=([cdistro]='BigCommunity' [chost]="communitybig" [ptcom]='.org' [calias]="bigcommunity" [cnick]="bigcommunity" [cliveuser]="live" [cgroups]='wheel,audio,video,users')
 	else
 		Adistro+=([cdistro]='Unknown' [chost]="linux" [ptcom]='.com' [calias]="linux" [cnick]="linux" [cliveuser]="live" [cgroups]='audio,video,users')
 	fi
