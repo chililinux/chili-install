@@ -1,6 +1,6 @@
 # Maintainer: Vilmar Catafesta <vcatafesta@gmail.com>
 
-pkgname=chili-void-install
+pkgname=chili-install
 pkgdesc="Instalador do ChiliLinux"
 depends=(gawk coreutils dialog grep util-linux parted sed ncurses pv libnewt which)
 #makedepends=('')
