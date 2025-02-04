@@ -3418,6 +3418,38 @@ sh_update_keymap() {
 			FONT="lat2a-16 -m 8859-2"
 			# End /etc/sysconfig/console
 		EOF
+	elif [[ "$xdistro" = @(bigcommunity|communitybig|biglinux) ]]; then
+	  fileconf="$dir_install/etc/vconsole.conf"
+    KEYMAP="${AConfLocale[_KEYMAP]}"
+    KEYMAP_before="${KEYMAP%-*}"
+    KEYMAP_after="${KEYMAP#*-}"
+		{
+      echo "# Written by systemd-localed(8) or systemd-firstboot(1), read by systemd-localed"
+      echo "# and systemd-vconsole-setup(8). Use localectl(1) to update this file."
+		  echo "KEYMAP=$KEYMAP"
+      echo "FONT=Uni2-Fixed16"
+      echo "XKBLAYOUT=$KEYMAP_before"
+      echo "XKBMODEL=$KEYMAP_after"
+    } > "$fileconf"
+
+    LANG="${LOCALE}.UTF-8"
+    {
+      echo "LANG=$LANG"
+      echo "LANGUAGE=$LANG"
+      echo "LC_TYPE=$LANG"
+      echo "LC_NUMERIC=$LANG"
+      echo "LC_TIME=$LANG"
+      echo "LC_COLLATE=$LANG"
+      echo "LC_MONETARY=$LANG"
+      echo "LC_MESSAGES=$LANG"
+      echo "LC_PAPER=$LANG"
+      echo "LC_NAME=$LANG"
+      echo "LC_ADDRESS=$LANG"
+      echo "LC_TELEPHONE=$LANG"
+      echo "LC_MEASUREMENT=$LANG"
+      echo "LC_IDENTIFICATION=$LANG"
+      echo "LC_ALL=$LANG"
+    } > "$dir_install/etc/locale.conf" > "$dir_install/etc/environment"
 	else
 		fileconf="$dir_install/etc/rc.conf"
 		[[ ! -e "$fileconf" ]] && >|"$fileconf"
