@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: ter 04 fev 2025 01:48:20 -04
+#  Updated: ter 04 fev 2025 16:31:37 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -3449,7 +3449,8 @@ sh_update_keymap() {
       echo "LC_MEASUREMENT=$LANG"
       echo "LC_IDENTIFICATION=$LANG"
       echo "LC_ALL=$LANG"
-    } > "$dir_install/etc/locale.conf" > "$dir_install/etc/environment"
+    } > "$dir_install/etc/locale.conf"
+    cp -f "$dir_install/etc/locale.conf" "$dir_install/etc/environment"
 	else
 		fileconf="$dir_install/etc/rc.conf"
 		[[ ! -e "$fileconf" ]] && >|"$fileconf"
