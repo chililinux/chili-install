@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: ter 04 fev 2025 16:31:37 -04
+#  Updated: qua 05 fev 2025 08:21:50 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -41,10 +41,11 @@ export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 shopt -s extglob
 
 declare -r _APP_="${0##*/}"
-declare -r _VERSION_="4.2.04.20250204"
+declare -r _VERSION_="4.2.05.20250205"
 declare -i quiet=0
 declare -i grafico=1
 declare -i ncounter=0
+declare -i njobs=42
 declare -i LAUTO=1 LINSTALL=0 LCHROOT=0 LBIND=0 LMKPART=0 LEFI=0 LBIOS=1 LMKPARTED=0 LOSPROBER=0 LFDE=0 LVM=0 LFS=0 LPARTITION=0 LTABLE=0
 declare -gA AsUser
 declare -gA Amntpoint
@@ -520,8 +521,8 @@ sh_chroot_job() {
 }
 
 fmt() {
-	printf "${bold}${yellow}%03d/%03d${reset}" "$ncounter" "$ncounter"
-	return $?
+  printf "${bold}${yellow}%03d/%03d${reset}" "$ncounter" "$njobs"
+  return $?
 }
 
 unfmt() {
@@ -845,10 +846,14 @@ sh_make_user() {
 
 	sh_update_sudoers
 
-	if [[ -d "$dir_install/home/$cliveuser/" ]]; then
-		sh_chroot_job "Adjusting legacy settings pass 2" "cd /home/$cuser; cp -Rpva /home/$cliveuser/. . ; chown $cuser:$cuser /home/$cuser/. -R" "$err_not_fatal" "$err_not_fatal"
-		sh_chroot_job "Deleting live user" "userdel --remove --force $cliveuser" "$err_not_fatal" "$err_not_fatal"
-	fi
+  if [[ -d "$dir_install/home/$cliveuser/" ]]; then
+    if [[ "$cliveuser" != "$cuser" ]]; then
+	   	sh_chroot_job "Adjusting legacy settings pass 2" "cd /home/$cuser; cp -Rpva /home/$cliveuser/. . ; chown $cuser:$cuser /home/$cuser/. -R" "$err_not_fatal" "$err_not_fatal"
+    fi
+  fi
+  if [[ "$cliveuser" != "$cuser" ]]; then
+    sh_chroot_job "Deleting live user" "userdel --remove --force $cliveuser" "$err_not_fatal" "$err_not_fatal"
+  fi
 }
 
 sh_update_sudoers() {
@@ -1399,7 +1404,7 @@ GRUB_DEFAULT=saved
 GRUB_TIMEOUT=5
 GRUB_DISTRIBUTOR="${xdistro^}"
 GRUB_TIMEOUT_STYLE=menu
-GRUB_CMDLINE_LINUX_DEFAULT="plymouth.enable=1 loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 nouveau.modeset=1 rw nosoftlockup audit=0 nomce skew_tick=1 intremap=off intel_pstate=active amd_pstate=passive cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never loglevel=3 systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on tdx=on nvme_load=yes"
+GRUB_CMDLINE_LINUX_DEFAULT="loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 nouveau.modeset=1 rw nosoftlockup audit=0 nomce skew_tick=1 intremap=off intel_pstate=active amd_pstate=passive cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never loglevel=3 systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on tdx=on nvme_load=yes"
 GRUB_CMDLINE_LINUX=""
 GRUB_PRELOAD_MODULES="part_gpt part_msdos lvm"
 GRUB_TIMEOUT_STYLE=menu
@@ -1455,8 +1460,26 @@ sh_mkefiroaming() {
 }
 
 sh_disable_services() {
-  sh_chroot_job "Disabling service: manjaro-live" "systemctl disable manjaro-live.service" "$err_not_fatal"
-  sh_chroot_job "Masking service: manjaro-live" "systemctl mask manjaro-live.service" "$err_not_fatal"
+  local masking=('manjaro-live')
+  local services=('manjaro-live'
+                  'avahi-daemon'
+                  'cups'
+                  'nginx'
+                  'vboxservice'
+                  'plymouth-start'
+                  'plymouth-quit'
+                  'plymouth-quit-wait'
+                  'plymouth-read-write'
+                  'plymouth-reboot'
+                  'plymouth-show-log-comm'
+                  'sddm-plymouth')
+
+  for service in ${services[@]}; do
+    sh_chroot_job "Disabling service: $service" "systemctl disable ${service}.service" "$err_not_fatal"
+  done
+  for mask in ${masking[@]}; do
+    sh_chroot_job "Masking service: $mask" "systemctl mask ${mask}.service" "$err_not_fatal"
+  done
 }
 
 sh_clean_issue() {
@@ -2437,15 +2460,15 @@ sh_make_fs() {
 			last_msg="${cmsg_FormatandoParticao[$LC_DEFAULT]} ${_PART} FS ${fstype,,}"
 			msg "INFO" "$last_msg" "$(log_info_msg "$last_msg")"
 			declare -A fsparms=(
-				[ext2]="-F   -L VOID"
-				[ext3]="-F   -L VOID"
-				[ext4]="-F   -L VOID"
-				[btrfs]="-f   -L VOID"
-				[f2fs]="-f   -l VOID"
-				[xfs]="-f   -L VOID"
-				[jfs]="-f   -L VOID"
+				[ext2]="-F   -L ROOT"
+				[ext3]="-F   -L ROOT"
+				[ext4]="-F   -L ROOT"
+				[btrfs]="-f   -L ROOT"
+				[f2fs]="-f   -l ROOT"
+				[xfs]="-f   -L ROOT"
+				[jfs]="-f   -L ROOT"
 				[vfat]="-F32 -n EFI"
-				[reiserfs]="-f   -l VOID"
+				[reiserfs]="-f   -l ROOT"
 			)
 			if [[ "$fstype" = "swap" ]]; then
 				mkswap "$_PART" 2>&1 | tee -i -a "$BOOTLOG" >"$LOGGER"
@@ -3496,7 +3519,7 @@ pt_BR() {
 	cmsg021='Formatar partição'
 	yeslabel='Sim'
 	nolabel='Não'
-	cfinish="Instalação completa!\nReboot para iniciar com $cdistro Linux.\n\nBugs? $xemail"
+	cfinish="Instalação finalizada!\nReboot para iniciar com $cdistro Linux.\n\nBugs? $xemail"
 	cgrubsuccess='GRUB instalado com sucesso!'
 	ccancelgrub='Instalação do GRUB cancelada!'
 	cmsgInstalar_GRUB='Instalar GRUB'
