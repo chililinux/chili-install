@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: qua 05 fev 2025 08:21:50 -04
+#  Updated: qui 06 fev 2025 00:27:03 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -41,7 +41,7 @@ export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 shopt -s extglob
 
 declare -r _APP_="${0##*/}"
-declare -r _VERSION_="4.2.05.20250205"
+declare -r _VERSION_="4.2.06.20250206"
 declare -i quiet=0
 declare -i grafico=1
 declare -i ncounter=0
@@ -224,22 +224,71 @@ sh_setEnvironment() {
 
 sh_confDistro() {
 	if [[ "$xdistro" = @(mazonos|MAZON) ]]; then
-		Adistro+=([cdistro]='MazonOs' [chost]='mazonos' [ptcom]='.com' [calias]='mazonos' [cnick]='mazon' [cliveuser]='mazon' [cgroups]='audio,video')
+		Adistro+=([cdistro]='MazonOs'
+		          [chost]='mazonos'
+		          [ptcom]='mazonos.com'
+		          [calias]='mazonos'
+		          [cnick]='mazon'
+		          [cliveuser]='mazon'
+		          [cgroups]='audio,video'
+		          )
 	elif [[ "$xdistro" = @(venom) ]]; then
-		Adistro+=([cdistro]='Venom' [chost]="${xdistro}live" [ptcom]='.com' [calias]="$xdistro" [cnick]="$xdistro" [cliveuser]="$xdistro" [cgroups]='wheel,audio,video,users')
+		Adistro+=([cdistro]='Venom'
+		          [chost]="${xdistro}live"
+		          [ptcom]='venomlinux.org'
+		          [calias]="$xdistro"
+		          [cnick]="$xdistro"
+		          [cliveuser]="$xdistro"
+		          [cgroups]='wheel,audio,video,users'
+		          )
 	elif [[ "$xdistro" = @(mint) ]]; then
-		Adistro+=([cdistro]='Mint' [chost]="${xdistro}live" [ptcom]='.com' [calias]="$xdistro" [cnick]="$xdistro" [cliveuser]="$xdistro" [cgroups]='audio,video,users')
+		Adistro+=([cdistro]='Mint'
+		          [chost]="${xdistro}live"
+		          [ptcom]='linuxmint.com'
+		          [calias]="$xdistro"
+		          [cnick]="$xdistro"
+		          [cliveuser]="$xdistro"
+		          [cgroups]='audio,video,users'
+		          )
 	elif [[ "$xdistro" = @(chili|chililinux) ]]; then
-		Adistro+=([cdistro]='Chili' [chost]="chililinux" [ptcom]='.com' [calias]="chili" [cnick]="chili" [cliveuser]="live" [cgroups]='wheel,audio,video,users')
+		Adistro+=([cdistro]='Chili'
+		          [chost]="chililinux"
+		          [ptcom]='chililinux.com'
+		          [calias]="chili"
+		          [cnick]="chili"
+		          [cliveuser]="live"
+		          [cgroups]='wheel,audio,video,users'
+		          )
   elif [[ "$xdistro" = @(bigcommunity|communitybig) ]]; then
-    Adistro+=([cdistro]='BigCommunity' [chost]="communitybig" [ptcom]='.org' [calias]="bigcommunity" [cnick]="bigcommunity" [cliveuser]="live" [cgroups]='wheel,audio,video,users')
+    Adistro+=([cdistro]='BigCommunity'
+              [chost]="bigcommunity"
+              [ptcom]='communitybig.org'
+              [calias]="bigcommunity"
+              [cnick]="bigcommunity"
+              [cliveuser]="live"
+              [cgroups]='wheel,audio,video,users'
+              )
   elif [[ "$xdistro" = @(biglinux) ]]; then
-    Adistro+=([cdistro]='BigLinux' [chost]="biglinux" [ptcom]='.com.br' [calias]="biglinux" [cnick]="biglinux" [cliveuser]="live" [cgroups]='wheel,audio,video,users')
+    Adistro+=([cdistro]='BigLinux'
+              [chost]="biglinux"
+              [ptcom]='biglinux.com.br'
+              [calias]="biglinux"
+              [cnick]="biglinux"
+              [cliveuser]="live"
+              [cgroups]='wheel,audio,video,users'
+              )
 	else
-		Adistro+=([cdistro]='Unknown' [chost]="linux" [ptcom]='.com' [calias]="linux" [cnick]="linux" [cliveuser]="live" [cgroups]='audio,video,users')
+		Adistro+=([cdistro]='Unknown'
+		          [chost]="linux"
+		          [ptcom]='linuxfoundation.org'
+		          [calias]="linux"
+		          [cnick]="linux"
+		          [cliveuser]="live"
+		          [cgroups]='audio,video,users'
+		          )
 	fi
 	# common vars
-	site="${Adistro[chost]}${Adistro[ptcom]}"
+	site="${Adistro[ptcom]}"
 	xemail="root@$site"
 	chostname="${Adistro[chost]}"
 	ccabec="${Adistro[cdistro]} install ${_VERSION_}"
@@ -1464,6 +1513,7 @@ sh_disable_services() {
   local services=('manjaro-live'
                   'avahi-daemon'
                   'cups'
+                  'docker'
                   'nginx'
                   'vboxservice'
                   'plymouth-start'
@@ -1486,12 +1536,12 @@ sh_clean_issue() {
   local fileconf="$dir_install/etc/issue"
 
   if [[ "$fileconf" ]]; then
-    sh_cmd_job "Removing $fileconf" "rm -f $fileconf" "$err_not_fatal"
+    sh_cmd_job "Removing $fileconf" "mv -f $fileconf $fileconf.bak" "$err_not_fatal"
   fi
 }
 
 sh_finishInstall() {
-	if confmulti "*** INSTALL ***" \ "\n$cfinish" \ "\nDeseja Rebootar agorar?"; then
+	if confmulti "*** INSTALL ***" \ "\n$cfinish" \ "\nDeseja Reiniciar agorar?"; then
 		sh_stop_bind
 		sh_stop_mount
     reboot
@@ -2460,15 +2510,15 @@ sh_make_fs() {
 			last_msg="${cmsg_FormatandoParticao[$LC_DEFAULT]} ${_PART} FS ${fstype,,}"
 			msg "INFO" "$last_msg" "$(log_info_msg "$last_msg")"
 			declare -A fsparms=(
-				[ext2]="-F   -L ROOT"
-				[ext3]="-F   -L ROOT"
-				[ext4]="-F   -L ROOT"
-				[btrfs]="-f   -L ROOT"
-				[f2fs]="-f   -l ROOT"
-				[xfs]="-f   -L ROOT"
-				[jfs]="-f   -L ROOT"
+				[ext2]="-F -L ROOT"
+				[ext3]="-F -L ROOT"
+				[ext4]="-F -L ROOT"
+				[btrfs]="-f -L ROOT"
+				[f2fs]="-f -l ROOT"
+				[xfs]="-f -L ROOT"
+				[jfs]="-f -L ROOT"
 				[vfat]="-F32 -n EFI"
-				[reiserfs]="-f   -l ROOT"
+				[reiserfs]="-f -l ROOT"
 			)
 			if [[ "$fstype" = "swap" ]]; then
 				mkswap "$_PART" 2>&1 | tee -i -a "$BOOTLOG" >"$LOGGER"
