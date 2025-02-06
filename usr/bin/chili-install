@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: qui 06 fev 2025 00:27:03 -04
+#  Updated: qui 06 fev 2025 06:38:45 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -1512,6 +1512,7 @@ sh_disable_services() {
   local masking=('manjaro-live')
   local services=('manjaro-live'
                   'avahi-daemon'
+                  'community-livecd-key'
                   'cups'
                   'docker'
                   'nginx'
@@ -3978,7 +3979,7 @@ sh_setLanguage() {
 			"Définir le gestionnaire de fenêtres"
 			"Definir administrador de ventanas"
 			"Definisci gestore di finestre")'
-		'cmsg_descWifi=("Definir rede e senha wifi (opcional)"
+		'cmsg_descWifi=("Definir rede, senha e conectar wifi (opcional)"
 			"Set wifi network and password (optional)"
 			"Stellen Sie das WLAN-Netzwerk und das Passwort ein (optional)"
 			"Définir le réseau wifi et le mot de passe (optionnel)"
@@ -5191,12 +5192,12 @@ sh_main_menu() {
 			FileSystem "${cmsg_descFileSystem[LC_DEFAULT]}" \
 			"${cmsg_Teclado[$LC_DEFAULT]}" "${cmsg_descTeclado[LC_DEFAULT]}" \
 			"Timezone" "${cmsg_descTimezone[LC_DEFAULT]}" \
+			"Wifi" "${cmsg_descWifi[LC_DEFAULT]}" \
 			"Extra" "${cmsg_descExtra[LC_DEFAULT]}" \
 			"${cmsg_Instalar[$LC_DEFAULT]}" "${cmsg_descInstalar[$LC_DEFAULT]}" \
 			"Fde" "Full-Disk Encryption + Lvm (optional)" \
 			"Lvm" "Logical Volume Management (optional)" \
 			"Vg" "Delete/Clear Volume Group (VG) from LVM (optional)" \
-			"Wifi" "${cmsg_descWifi[LC_DEFAULT]}" \
 			"Chroot" "$cinitbind" \
 			"Clonedisk" "Util Clonedisk")
 
@@ -5221,14 +5222,14 @@ sh_main_menu() {
 		"FileSystem") sh_choosePartition && [ -n "$LPARTITION" ] && DEFITEM="${cmsg_Teclado[$LC_DEFAULT]}" ;;
 		"${cmsg_Teclado[$LC_DEFAULT]}") sh_chooseKeymap && [ -n "$LKEYMAP" ] && DEFITEM="Timezone" ;;
 		"Timezone") sh_chooseTimezone && [ -n "$LTIMEZONE" ] && DEFITEM="Extra" ;;
-		"Extra") sh_confadduser && [ -n "$LEXTRA" ] && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
+		"Extra") sh_confadduser && [ -n "$LEXTRA" ] && DEFITEM="Wifi" ;;
+		"Wifi") bash chili-wifi-config-wpa && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
 		"${cmsg_Instalar[$LC_DEFAULT]}") sh_install ;;
 		"Fde") sh_confLvm && [ -n "$LFDE" ] && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
 		"Lvm") sh_confLvm && [ -n "$LVM" ] && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
 		"Vg") sh_chooseVg ;;
-		"Wifi") sh_confWifi && [ -n "$LWIFI" ] && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
 		"Chroot") sh_dryrun ;;
-		"Clonedisk") exec chili-clonedisk ;;
+		"Clonedisk") bash chili-clonedisk ;;
 		esac
 	done
 }
