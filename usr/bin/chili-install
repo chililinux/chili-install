@@ -1509,7 +1509,7 @@ sh_mkefiroaming() {
 }
 
 sh_disable_services() {
-  local masking=('manjaro-live')
+  local masking=('manjaro-live' 'plymouth-start')
   local services=('manjaro-live'
                   'avahi-daemon'
                   'community-livecd-key'
@@ -5223,7 +5223,7 @@ sh_main_menu() {
 		"${cmsg_Teclado[$LC_DEFAULT]}") sh_chooseKeymap && [ -n "$LKEYMAP" ] && DEFITEM="Timezone" ;;
 		"Timezone") sh_chooseTimezone && [ -n "$LTIMEZONE" ] && DEFITEM="Extra" ;;
 		"Extra") sh_confadduser && [ -n "$LEXTRA" ] && DEFITEM="Wifi" ;;
-		"Wifi") bash chili-wifi-config-wpa && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
+		"Wifi") bash chili-wifi-config && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
 		"${cmsg_Instalar[$LC_DEFAULT]}") sh_install ;;
 		"Fde") sh_confLvm && [ -n "$LFDE" ] && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
 		"Lvm") sh_confLvm && [ -n "$LVM" ] && DEFITEM="${cmsg_Instalar[$LC_DEFAULT]}" ;;
