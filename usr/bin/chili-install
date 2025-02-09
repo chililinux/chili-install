@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: sex 07 fev 2025 13:27:53 -04
+#  Updated: dom 09 fev 2025 01:22:45 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -41,11 +41,11 @@ export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 shopt -s extglob
 
 declare -r _APP_="${0##*/}"
-declare -r _VERSION_="4.2.07.20250207"
+declare -r _VERSION_="4.2.09.20250209"
 declare -i quiet=0
 declare -i grafico=1
 declare -i ncounter=0
-declare -i njobs=42
+declare -i njobs=50
 declare -i LAUTO=1 LINSTALL=0 LCHROOT=0 LBIND=0 LMKPART=0 LEFI=0 LBIOS=1 LMKPARTED=0 LOSPROBER=0 LFDE=0 LVM=0 LFS=0 LPARTITION=0 LTABLE=0
 declare -gA AsUser
 declare -gA Amntpoint
@@ -61,7 +61,7 @@ declare -gA AConfLocale=([_TIMEZONE]='America/Sao_Paulo' [_KEYMAP]='br-abnt2' [_
 declare -gA AConfWifi=([_NETWORK]='wifi_ssid' [_PASSWORD]='wifi_password')
 declare -gA Alanguage=([pt_BR]=0 [en_US]=1 [de_DE]=2 [fr_FR]=3 [es_ES]=4 [it_IT]=5)
 declare -gA Alocale=([0]=pt_BR [1]=en_US [2]=de_DE [3]=fr_FR [4]=es_ES [5]=it_IT)
-readonly DEPENDENCIES=(awk cat cut dialog dd grep lsblk parted sed sfdisk tee tput pv whiptail which)
+readonly DEPENDENCIES=(awk cat cut dialog dd grep lsblk parted sed sfdisk tee tput pv whiptail which tr)
 declare dialogRcFile="$HOME/.dialogrc"
 
 cleanup() {
@@ -229,6 +229,7 @@ sh_confDistro() {
 	if [[ "$xdistro" = @(mazonos|MAZON) ]]; then
 		Adistro+=([cdistro]='MazonOs'
 		          [chost]='mazonos'
+		          [contato]='root@mazonos.com'
 		          [ptcom]='mazonos.com'
 		          [calias]='mazonos'
 		          [cnick]='mazon'
@@ -238,6 +239,7 @@ sh_confDistro() {
 	elif [[ "$xdistro" = @(venom) ]]; then
 		Adistro+=([cdistro]='Venom'
 		          [chost]="${xdistro}live"
+		          [contato]='root@venomlinux.org'
 		          [ptcom]='venomlinux.org'
 		          [calias]="$xdistro"
 		          [cnick]="$xdistro"
@@ -247,6 +249,7 @@ sh_confDistro() {
 	elif [[ "$xdistro" = @(mint) ]]; then
 		Adistro+=([cdistro]='Mint'
 		          [chost]="${xdistro}live"
+		          [contato]='root@linuxmint.com'
 		          [ptcom]='linuxmint.com'
 		          [calias]="$xdistro"
 		          [cnick]="$xdistro"
@@ -256,6 +259,7 @@ sh_confDistro() {
 	elif [[ "$xdistro" = @(chili|chililinux) ]]; then
 		Adistro+=([cdistro]='Chili'
 		          [chost]="chililinux"
+		          [contato]='https://t.me/chililinux'
 		          [ptcom]='chililinux.com'
 		          [calias]="chili"
 		          [cnick]="chili"
@@ -265,6 +269,7 @@ sh_confDistro() {
   elif [[ "$xdistro" = @(bigcommunity|communitybig) ]]; then
     Adistro+=([cdistro]='BigCommunity'
               [chost]="bigcommunity"
+              [contato]='https://t.me/BigLinuxCommunity'
               [ptcom]='communitybig.org'
               [calias]="bigcommunity"
               [cnick]="bigcommunity"
@@ -274,6 +279,7 @@ sh_confDistro() {
   elif [[ "$xdistro" = @(biglinux) ]]; then
     Adistro+=([cdistro]='BigLinux'
               [chost]="biglinux"
+              [contato]='root@biglinux.com.br'
               [ptcom]='biglinux.com.br'
               [calias]="biglinux"
               [cnick]="biglinux"
@@ -283,6 +289,7 @@ sh_confDistro() {
 	else
 		Adistro+=([cdistro]='Unknown'
 		          [chost]="linux"
+		          [contato]='root@linuxfoundation.org'
 		          [ptcom]='linuxfoundation.org'
 		          [calias]="linux"
 		          [cnick]="linux"
@@ -291,8 +298,9 @@ sh_confDistro() {
 		          )
 	fi
 	# common vars
+	cdistro="${Adistro[cdistro]}"
 	site="${Adistro[ptcom]}"
-	xemail="root@$site"
+	xemail="${Adistro[contato]}"
 	chostname="${Adistro[chost]}"
 	ccabec="${Adistro[cdistro]} install ${_VERSION_}"
 	ctitle="${Adistro[cdistro]} install"
@@ -862,7 +870,7 @@ confmulti() {
 		--yes-label "$yeslabel" \
 		--no-label "$nolabel" \
 		--yesno "$*" \
-		10 60
+		15 60
 	nchoice=$?
 	return $nchoice
 }
@@ -1511,8 +1519,17 @@ sh_mkefiroaming() {
 	return 0
 }
 
+sh_remove_packages() {
+  local apackages=('plymouth-theme-community')
+
+  for pkg in ${apackaes[@]}; do
+    sh_chroot_job "Removing package: $pkg" "sudo pacman -Rdd $pkg --noconfirm" "$err_not_fatal"
+  done
+}
+
 sh_disable_services() {
-  local masking=('manjaro-live' 'plymouth-start')
+  local masking=('manjaro-live'
+                 'plymouth-start')
   local services=('manjaro-live'
                   'avahi-daemon'
                   'community-livecd-key'
@@ -1540,12 +1557,19 @@ sh_clean_issue() {
   local fileconf="$dir_install/etc/issue"
 
   if [[ "$fileconf" ]]; then
-    sh_cmd_job "Removing $fileconf" "mv -f $fileconf $fileconf.bak" "$err_not_fatal"
+    sh_cmd_job "Renaming $fileconf" "mv -f ${fileconf} ${fileconf}.bak" "$err_not_fatal"
+    sh_cmd_job "Renaming $fileconf" "mv -f ${fileconf}.pro ${fileconf}" "$err_not_fatal"
   fi
 }
 
 sh_finishInstall() {
-	if confmulti "*** INSTALL ***" \ "\n$cfinish" \ "\nDeseja Reiniciar agorar?"; then
+	if confmulti \
+"*** INSTALL ***" \
+"\n$cfinish\n\n" \
+"Start Date time  : $start_datetime\n" \
+"Finish Date Time : $end_datetime\n" \
+"Time elapsed     : ${RED}$(sh_time_elapsed)\n" \
+"\n${YELLOW}Deseja Reiniciar agorar?"; then
 		sh_stop_bind
 		sh_stop_mount
     reboot
@@ -2001,9 +2025,7 @@ sh_mkparted() {
 		nchoice=$true
 	fi
 
-	if ! ((LAUTOMATICA)); then
-		xmkfs="ext4"
-	fi
+	[[ -z "$xmkfs" ]] && xmkfs="ext4"
 
 	if ((nchoice)); then
 		last_msg="${cmsg_CriandoParticoes[$LC_DEFAULT]} ${_DEVICE}"
@@ -2504,10 +2526,10 @@ sh_check_util_fs() {
 }
 
 sh_make_fs() {
-	local i
 	local _PART
 	local format
 	local fstype
+	local i
 
 	sh_check_util_fs
 	for i in "${!Amntpoint[@]}"; do
@@ -2519,13 +2541,13 @@ sh_make_fs() {
 			last_msg="${cmsg_FormatandoParticao[$LC_DEFAULT]} ${_PART} FS ${fstype,,}"
 			msg "INFO" "$last_msg" "$(log_info_msg "$last_msg")"
 			declare -A fsparms=(
-				[ext2]="-F -L ROOT"
-				[ext3]="-F -L ROOT"
-				[ext4]="-F -L ROOT"
-				[btrfs]="-f -L ROOT"
-				[f2fs]="-f -l ROOT"
-				[xfs]="-f -L ROOT"
-				[jfs]="-f -L ROOT"
+				[ext2]="-F   -L ROOT"
+				[ext3]="-F   -L ROOT"
+				[ext4]="-F   -L ROOT"
+				[btrfs]="-f  -L ROOT"
+				[f2fs]="-f   -l ROOT"
+				[xfs]="-f    -L ROOT"
+				[jfs]="-f    -L ROOT"
 				[vfat]="-F32 -n EFI"
 				[reiserfs]="-f -l ROOT"
 			)
@@ -2537,10 +2559,13 @@ sh_make_fs() {
 			evaluate_retval "${PIPESTATUS[0]}"
 		fi
 	done
+	LFORMAT=$true
 
 	if ((LVM)); then
 		sh_make_fsLvm
 	fi
+	LFORMAT=$true
+	return 0
 }
 
 sh_format() {
@@ -3578,7 +3603,7 @@ pt_BR() {
 	cmsg021='Formatar partição'
 	yeslabel='Sim'
 	nolabel='Não'
-	cfinish="Instalação finalizada!\nReboot para iniciar com $cdistro Linux.\n\nBugs? $xemail"
+	cfinish="Instalação finalizada!\nReboot para iniciar com $cdistro Linux.\nBugs? $xemail"
 	cgrubsuccess='GRUB instalado com sucesso!'
 	ccancelgrub='Instalação do GRUB cancelada!'
 	cmsgInstalar_GRUB='Instalar GRUB'
@@ -3658,7 +3683,7 @@ en_US() {
 	cmsg021='Format partition'
 	yeslabel='Yes'
 	nolabel='No'
-	cfinish="Install Complete!\nReboot to start with $cdistro Linux. \n\nBugs? $xemail"
+	cfinish="Install Complete!\nReboot to start with $cdistro Linux. \nBugs? $xemail"
 	cgrubsuccess='GRUB successfully installed!'
 	ccancelgrub='Installing grub canceled!'
 	cmsgInstalar_GRUB='Install GRUB'
@@ -5035,7 +5060,24 @@ sh_cancelLiveInstall() {
 	sh_main_menu "$@"
 }
 
+sh_time_elapsed() {
+  local end_time=$(date +%s)                # Obtém o tempo de término em segundos desde a época Unix
+  local duration=$((end_time - start_time)) # Calcula a duração em segundos
+  local hours=$((duration / 3600))
+  local minutes=$(((duration % 3600) / 60))
+  local seconds=$((duration % 60))
+
+  # Formatar os valores para terem sempre dois dígitos
+  hours=$(printf "%02d" $hours)
+  minutes=$(printf "%02d" $minutes)
+  seconds=$(printf "%02d" $seconds)
+  echo "$hours:$minutes:$seconds"
+}
+
 sh_install() {
+  local start_datetime
+  local end_datetime
+
 	if ((LAUTOMATICA)); then
 		confmulti "${cmsgInstalacao_Automatica^^}" "\n${BOLD}$cmsgNeste_modo_a_instalacao_sera_automatizada" \
 			"bastando escolher o disco destino" "\n\n${BOLD}${WHITE}$cmsgDeseja_continuar_e_escolher_o_disco_destino?" || sh_cancelLiveInstall "$@"
@@ -5074,6 +5116,10 @@ sh_install() {
 		"${cmsg_OuPeloTerminal[LC_DEFAULT]}                : ${BLUE}(ctrl+alt+f8)${RESET}" \
 		"\n\n${BOLD}${WHITE}${cmsg_descInstalar[$LC_DEFAULT]}?" || sh_cancelLiveInstall "$@"
 
+
+  start_time=$(date +%s) # Obtém o tempo de início em segundos desde a época Unix
+  start_datetime=$(date)
+
 	sh_make_fs || sh_cancelLiveInstall "$@"
 	sh_disk_part_info
 	sh_validate_filesystem || sh_cancelLiveInstall "$@"
@@ -5088,9 +5134,13 @@ sh_install() {
 	sh_update_keymap
 	sh_update_Xkeymap
 	sh_update_timezone
+  sh_remove_packages
 	sh_grubinstall || sh_cancelLiveInstall "$@"
   sh_disable_services
   sh_clean_issue
+
+  end_datetime=$(date)
+
 	sh_finishInstall
 	zeravar
 }
@@ -5130,49 +5180,6 @@ sh_chooseKeymap() {
 		LKEYMAP=$true
 	fi
 	return "$nchoice"
-}
-
-sh_make_fs() {
-	local _PART
-	local format
-	local fstype
-	local i
-
-	sh_check_util_fs
-	for i in "${!Amntpoint[@]}"; do
-		_PART="$i"
-		fstype="$(sh_splitarray "${Amntpoint[$i]}" 2)"
-		format="$(sh_splitarray "${Amntpoint[$i]}" 3)"
-
-		if [[ "$format" = "1" ]]; then
-			last_msg="${cmsg_FormatandoParticao[$LC_DEFAULT]} ${_PART} FS ${fstype,,}"
-			msg "INFO" "$last_msg" "$(log_info_msg "$last_msg")"
-			declare -A fsparms=(
-				[ext2]="-F   -L VOID"
-				[ext3]="-F   -L VOID"
-				[ext4]="-F   -L VOID"
-				[btrfs]="-f   -L VOID"
-				[f2fs]="-f   -l VOID"
-				[xfs]="-f   -L VOID"
-				[jfs]="-f   -L VOID"
-				[vfat]="-F32 -n EFI"
-				[reiserfs]="-f   -l VOID"
-			)
-			if [[ "$fstype" = "swap" ]]; then
-				mkswap "$_PART" 2>&1 | tee -i -a "$BOOTLOG" >"$LOGGER"
-			else
-				mkfs.$fstype ${fsparms[$fstype]} $_PART 2>&1 | tee -i -a "$BOOTLOG" >"$LOGGER"
-			fi
-			evaluate_retval "${PIPESTATUS[0]}"
-		fi
-	done
-	LFORMAT=$true
-
-	if ((LVM)); then
-		sh_make_fsLvm
-	fi
-	LFORMAT=$true
-	return 0
 }
 
 sh_main_menu() {
