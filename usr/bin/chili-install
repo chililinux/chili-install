@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: dom 09 fev 2025 01:22:45 -04
+#  Updated: dom 09 fev 2025 14:38:22 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -38,7 +38,7 @@
 export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 #set -x
 #set -e
-shopt -s extglob
+shopt -s extglob  # Habilita padrões estendidos
 
 declare -r _APP_="${0##*/}"
 declare -r _VERSION_="4.2.09.20250209"
@@ -308,30 +308,18 @@ sh_confDistro() {
 	url_release="http://${site}/releases"
 	url_distro="http://${site}/releases/"
 
-	sh_setUser
+  sh_setUser
 }
 
 sh_setUser() {
-	AsUser[cuser]=$(sh_getusernameloggeduserbyid)
-	AsUser[cfullname]=$(sh_getfullusernameloggeduserbyid)
-	AsUser[cpass]="${Adistro[cliveuser]}"
-	AsUser[cpassroot]=root
-	AsUser[chostname]="$chostname"
-	AsUser[cgroups]="${Adistro[cgroups]}"
-
-	#	AsUser[cuser]=${AsUser[cuser]:-${AsUser[cuser]:-$(sh_getusernameloggeduserbyid)}}
-	#	AsUser[cfullname]=${AsUser[cfullname]:-${AsUser[cfullname]:-$(sh_getfullusernameloggeduserbyid)}}
-	#	AsUser[cpass]=${AsUser[cpass]:-${AsUser[cpass]:-$cliveuser}}
-	#	AsUser[cpassroot]=${AsUser[cpassroot]:-${AsUser[cpassroot]:-root}}
-	#	AsUser[chostname]=${AsUser[chostname]:-${AsUser[chostname]:-"$chostname"}}
-	#	AsUser[cgroups]=${AsUser[cgroups]:-${AsUser[cgroups]:-"$cgroups"}}
-
-	#	[[ -v AsUser[cuser]     && (-z ${AsUser[cuser]}     || ${#AsUser[cuser]}     -eq 0) ]] && AsUser[cuser]=$(sh_getusernameloggeduserbyid)
-	#	[[ -v AsUser[cfullname] && (-z ${AsUser[cfullname]} || ${#AsUser[cfullname]} -eq 0) ]] && AsUser[cfullname]=$(sh_getfullusernameloggeduserbyid)
-	#	[[ -v AsUser[cpass]     && (-z ${AsUser[cpass]}     || ${#AsUser[cpass]}     -eq 0) ]] && AsUser[cpass]="$cliveuser"
-	#	[[ -v AsUser[cpassroot] && (-z ${AsUser[cpassroot]} || ${#AsUser[cpassroot]} -eq 0) ]] && AsUser[cpassroot]=root
-	#	[[ -v AsUser[chostname] && (-z ${AsUser[chostname]} || ${#AsUser[chostname]} -eq 0) ]] && AsUser[chostname]="$chostname"
-	#	[[ -v AsUser[cgroups]   && (-z ${AsUser[cgroups]}   || ${#AsUser[cgroups]}   -eq 0) ]] && AsUser[cgroups]="$cgroups"
+  if [[ ! "$xdistro" =~ (bigcommunity|communitybig|biglinux) ]]; then
+  	AsUser[cuser]=$(sh_getusernameloggeduserbyid)
+  	AsUser[cfullname]=$(sh_getfullusernameloggeduserbyid)
+  	AsUser[cpass]="${Adistro[cliveuser]}"
+  	AsUser[cpassroot]=root
+  fi
+  AsUser[cgroups]="${Adistro[cgroups]}"
+  AsUser[chostname]="$chostname"
 }
 
 sh_touchConf() {
@@ -399,7 +387,7 @@ sh_loadSavedConfig() {
 	else
 		die "${cmsg_falhaAbertura[$LC_DEFAULT]} $app_conf!"
 	fi
-	sh_setUser
+  sh_setUser
 }
 
 sh_getfullusernameloggeduser() {
@@ -1527,10 +1515,11 @@ sh_remove_packages() {
   done
 }
 
-sh_disable_services() {
-  local masking=('manjaro-live'
-                 'plymouth-start')
-  local services=('manjaro-live'
+sh_enable_disable_services() {
+  local service
+  local ServicesToMasking=('manjaro-live' 'plymouth-start')
+  local ServicesToEnable=('systemd-timesyncd')
+  local ServicesToDisable=('manjaro-live'
                   'avahi-daemon'
                   'community-livecd-key'
                   'cups'
@@ -1545,11 +1534,14 @@ sh_disable_services() {
                   'plymouth-show-log-comm'
                   'sddm-plymouth')
 
-  for service in ${services[@]}; do
+  for service in ${ServicesToDisable[@]}; do
     sh_chroot_job "Disabling service: $service" "systemctl disable ${service}.service" "$err_not_fatal"
   done
-  for mask in ${masking[@]}; do
-    sh_chroot_job "Masking service: $mask" "systemctl mask ${mask}.service" "$err_not_fatal"
+  for service in ${ServicesToMasking[@]}; do
+    sh_chroot_job "Masking service: $service" "systemctl mask ${service}.service" "$err_not_fatal"
+  done
+  for service in ${ServicesToEnable[@]}; do
+    sh_chroot_job "Enabling service: $service" "systemctl enable ${service}.service" "$err_not_fatal"
   done
 }
 
@@ -1568,7 +1560,7 @@ sh_finishInstall() {
 "\n$cfinish\n\n" \
 "Start Date time  : $start_datetime\n" \
 "Finish Date Time : $end_datetime\n" \
-"Time elapsed     : ${RED}$(sh_time_elapsed)\n" \
+"Time elapsed     : ${GREEN}$(sh_time_elapsed)\n" \
 "\n${YELLOW}Deseja Reiniciar agorar?"; then
 		sh_stop_bind
 		sh_stop_mount
@@ -3280,6 +3272,13 @@ sh_confadduser() {
 				fi
 				sh_confadduser
 			fi
+
+			if [[ -z "${AsUser[chostname]}" ]]; then
+				if ! conf "*** ROOT ***" "\n${cmsg_adduser5[$LC_DEFAULT]}"; then
+					die "*** ROOT *** " "${cmsg_adduserCancel[$LC_DEFAULT]}"
+				fi
+				sh_confadduser
+			fi
 			LEXTRA=$true
 			;;
 		esac
@@ -4660,6 +4659,12 @@ sh_setLanguage() {
 		"Le mot de passe root ne peut pas être vide ! De nouveau?"
 		"¡La contraseña raíz no puede estar vacía! ¿Otra vez?"
 		"La password di root non può essere vuota! Di nuovo?")'
+		'cmsg_adduser5=("Hostname não pode ser vazio! Novamente?"
+		"Hostname cannot be empty! Again?"
+		"Hostname darf nicht leer sein! Wieder?"
+		"Le nom de hôte ne peut pas être vide ! Encore?"
+		"¡El nombre de host no puede estar vacío! ¿De nuevo?"
+		"Il nome host non può essere vuoto! Ancora?")'
 		'cmsg_adduserCancel=("Cadastro de usuário cancelado"
 		"Canceled user registration"
 		"Abgebrochene Benutzerregistrierung"
@@ -5136,7 +5141,7 @@ sh_install() {
 	sh_update_timezone
   sh_remove_packages
 	sh_grubinstall || sh_cancelLiveInstall "$@"
-  sh_disable_services
+  sh_enable_disable_services
   sh_clean_issue
 
   end_datetime=$(date)
