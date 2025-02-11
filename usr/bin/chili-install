@@ -3302,7 +3302,7 @@ sh_choosefstype() {
 	Afs[f2fs]="Flash-Friendly Filesystem"
 	Afs[ext3]="Linux ext3 (journal)"
 	Afs[ext2]="Linux ext2 (no journaling)"
-	Afs[btrfs]="Oracle Btrfs"
+	Afs[btrfs]="Linux B-tree File System"
 	Afs[ext4]="Linux ext4 (journal)"
 	Afs[vfat]="FAT32 (EFI)"
 	Afs[swap]="Linux swap"
