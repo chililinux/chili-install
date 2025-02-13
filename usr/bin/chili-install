@@ -1054,9 +1054,11 @@ sh_mount_fs() {
             log_exec mkdir -p $dir_install/home
             log_exec mkdir -p $dir_install/var/cache
             log_exec mkdir -p $dir_install/var/log
+            log_exec mkdir -p $dir_install/swapfc/swapfile
             log_exec mount -o subvol=@home   $_part $dir_install/home
             log_exec mount -o subvol=@cache  $_part $dir_install/var/cache
             log_exec mount -o subvol=@log    $_part $dir_install/var/log
+            log_exec mount -o subvol=@swapfc $_part $dir_install/swapfc/swapfile
           else
     				log_exec mount "$_part" "$dir_install"
           fi
@@ -1472,7 +1474,7 @@ sh_mkefiroaming() {
 }
 
 sh_remove_packages() {
-  local aPackagesToRemove=('manjaro-live-systemd' 'plymouth-theme-community')
+  local aPackagesToRemove=('manjaro-live-systemd' 'plymouth-theme-community' 'community-livecd-key')
 
   for pkg in ${aPackagesToRemove[@]}; do
     sh_chroot_job "Removing package: $pkg" "pacman -Rdd $pkg --noconfirm" "$err_not_fatal"
@@ -1482,7 +1484,7 @@ sh_remove_packages() {
 sh_enable_disable_services() {
   local service
   local ServicesToMasking=('manjaro-live' 'plymouth-start')
-  local ServicesToEnable=('systemd-timesyncd')
+  local ServicesToEnable=('systemd-timesyncd' 'pre-systemd-swap' 'systemd-swap')
   local ServicesToDisable=('manjaro-live'
                   'avahi-daemon'
                   'mirrors-live'
@@ -2534,6 +2536,7 @@ sh_make_fs() {
         log_exec btrfs subvolume create $dir_install/@home
         log_exec btrfs subvolume create $dir_install/@cache
         log_exec btrfs subvolume create $dir_install/@log
+        log_exec btrfs subvolume create $dir_install/@swapfc
         log_exec umount $_PART
 			else
 				log_exec mkfs.$fstype ${fsparms[$fstype]} $_PART
@@ -3448,6 +3451,7 @@ sh_make_fstab() {
 	  			echo "UUID=$(blkid -o value -s UUID "${_part}")  /home         ${fstype,,}   subvol=/@home,defaults,noatime,ssd,compress-force=zstd,commit=10 0 $fsorder"
 	  			echo "UUID=$(blkid -o value -s UUID "${_part}")  /var/cache    ${fstype,,}   subvol=/@cache,defaults,noatime,ssd,compress-force=zstd,commit=10 0 $fsorder"
 	  			echo "UUID=$(blkid -o value -s UUID "${_part}")  /var/log      ${fstype,,}   subvol=/@log,defaults,noatime,ssd,compress-force=zstd,commit=10 0 $fsorder"
+	  			echo "UUID=$(blkid -o value -s UUID "${_part}")  /swapfc       ${fstype,,}   subvol=/@swapfc,defaults 0 $fsorder"
 	  			} >>"$dir_install/etc/fstab"
         else
   				echo "UUID=$(blkid -o value -s UUID "${_part}")  ${mntpoint}   ${fstype,,}   defaults 0 $fsorder" >>"$dir_install/etc/fstab"
