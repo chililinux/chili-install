@@ -1054,9 +1054,11 @@ sh_mount_fs() {
             log_exec mkdir -p $dir_install/home
             log_exec mkdir -p $dir_install/var/cache
             log_exec mkdir -p $dir_install/var/log
+            log_exec mkdir -p $dir_install/swapfc
             log_exec mount -o subvol=@home   $_part $dir_install/home
             log_exec mount -o subvol=@cache  $_part $dir_install/var/cache
             log_exec mount -o subvol=@log    $_part $dir_install/var/log
+            log_exec mount -o subvol=@swapfc $_part $dir_install/swapfc
           else
     				log_exec mount "$_part" "$dir_install"
           fi
@@ -1471,11 +1473,15 @@ sh_mkefiroaming() {
 	return 0
 }
 
-sh_remove_packages() {
+sh_install_remove_packages() {
   local aPackagesToRemove=('manjaro-live-systemd' 'community-livecd-key')
+  local aPackagesToInstall=('biglinux-systemd-swap')
 
   for pkg in ${aPackagesToRemove[@]}; do
     sh_chroot_job "Removing package: $pkg" "pacman -Rdd $pkg --noconfirm" "$err_not_fatal"
+  done
+  for pkg in ${aPackagesToInstall[@]}; do
+    sh_chroot_job "Istalling package: $pkg" "pacman -S $pkg --noconfirm" "$err_not_fatal"
   done
 }
 
@@ -2538,6 +2544,7 @@ sh_make_fs() {
         log_exec btrfs subvolume create $dir_install/@home
         log_exec btrfs subvolume create $dir_install/@cache
         log_exec btrfs subvolume create $dir_install/@log
+        log_exec btrfs subvolume create $dir_install/@swapfc
         log_exec umount $_PART
 			else
 				log_exec mkfs.$fstype ${fsparms[$fstype]} $_PART
@@ -3452,6 +3459,7 @@ sh_make_fstab() {
 	  			echo "UUID=$(blkid -o value -s UUID "${_part}")  /home         ${fstype,,}   subvol=/@home,defaults,noatime,ssd,compress-force=zstd,commit=10 0 $fsorder"
 	  			echo "UUID=$(blkid -o value -s UUID "${_part}")  /var/cache    ${fstype,,}   subvol=/@cache,defaults,noatime,ssd,compress-force=zstd,commit=10 0 $fsorder"
 	  			echo "UUID=$(blkid -o value -s UUID "${_part}")  /var/log      ${fstype,,}   subvol=/@log,defaults,noatime,ssd,compress-force=zstd,commit=10 0 $fsorder"
+	  			echo "UUID=$(blkid -o value -s UUID "${_part}")  /swapfc       ${fstype,,}   subvol=/@swapfc,defaults,noatime 0 $fsorder"
 	  			} >>"$dir_install/etc/fstab"
         else
   				echo "UUID=$(blkid -o value -s UUID "${_part}")  ${mntpoint}   ${fstype,,}   defaults 0 $fsorder" >>"$dir_install/etc/fstab"
@@ -5154,7 +5162,7 @@ sh_install() {
 	sh_update_keymap
 	sh_update_Xkeymap
 	sh_update_timezone
-  sh_remove_packages
+  sh_install_remove_packages
 	sh_grubinstall || sh_cancelLiveInstall "$@"
   sh_enable_disable_services
   #sh_pacman_key_init
