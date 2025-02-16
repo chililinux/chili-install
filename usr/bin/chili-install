@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: sáb 15 fev 2025 13:32:13 -03
+#  Updated: sáb 15 fev 2025 22:22:00 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -1076,15 +1076,14 @@ sh_mount_fs() {
 				msg "INFO" "$last_msg" "$(log_info_msg "$last_msg")"
   			if [[ -n "$mntpoint" && "$mntpoint" = "/" ]]; then
     			if [[ "$fstype" = "btrfs" ]]; then
-            log_exec mount -o subvol=@       $_part $dir_install
-            log_exec mkdir -p $dir_install/home
-            log_exec mkdir -p $dir_install/var/cache
-            log_exec mkdir -p $dir_install/var/log
-            log_exec mkdir -p $dir_install/swapfc
-            log_exec mount -o subvol=@home   $_part $dir_install/home
-            log_exec mount -o subvol=@cache  $_part $dir_install/var/cache
-            log_exec mount -o subvol=@log    $_part $dir_install/var/log
-            log_exec mount -o subvol=@swapfc $_part $dir_install/swapfc
+            log_exec mount -o compress=zstd,subvol=@       $_part $dir_install
+            for dir in home var/cache var/log swapfc; do
+              [[ -d "$dir_install/$dir" ]] || log_exec mkdir -p "$dir_install/$dir"
+            done
+            log_exec mount -o compress=zstd,subvol=@home   "$_part" "$dir_install/home"
+            log_exec mount -o compress=zstd,subvol=@cache  "$_part" "$dir_install/var/cache"
+            log_exec mount -o compress=zstd,subvol=@log    "$_part" "$dir_install/var/log"
+            log_exec mount -o compress=zstd,subvol=@swapfc "$_part" "$dir_install/swapfc"
           else
     				log_exec mount "$_part" "$dir_install"
           fi
