@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: dom 23 fev 2025 23:00:43 -04
+#  Updated: seg 24 fev 2025 01:02:49 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -41,7 +41,7 @@ export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 shopt -s extglob  # Habilita padrões estendidos
 
 declare -r _APP_="${0##*/}"
-declare -r _VERSION_="4.2.23.20250223"
+declare -r _VERSION_="4.2.24.20250224"
 declare -i quiet=0
 declare -i grafico=1
 declare -i ncounter=0
@@ -1514,21 +1514,25 @@ sh_install_remove_packages() {
 #  done
 
 #  for pkg in ${aPackagesToInstall[@]}; do
-#    sh_chroot_job "Istalling package: $pkg" "pacman -S $pkg --noconfirm" "$err_not_fatal"
+#    sh_chroot_job "Installing package: $pkg" "pacman -S $pkg --noconfirm" "$err_not_fatal"
 #  done
 
   if [[ -e "$dir_install"/etc/Root-install ]]; then
-    aPackagesRoot_install=("$(printf "%s\n" $(<$dir_install/etc/Root-install))")
-    for pkg in ${aPackagesRoot_install[@]}; do
-      sh_chroot_job "Istalling package: $pkg" "pacman -S $pkg --noconfirm" "$err_not_fatal"
-    done
+    mapfile -t aPackagesRoot_install < "$dir_install/etc/Root-install"
+    if [[ ${#aPackagesRoot_install[@]} -gt 0 ]]; then
+      for pkg in "${aPackagesRoot_install[@]}"; do
+        sh_chroot_job "Installing package from Root-install: $pkg" "pacman -S $pkg --noconfirm" "$err_not_fatal"
+      done
+    fi
   fi
 
   if [[ -e "$dir_install"/etc/Root-remove ]]; then
-    aPackagesRoot_remove=("$(printf "%s\n" $(<$dir_install/etc/Root-remove))")
-    for pkg in ${aPackagesRoot_remove[@]}; do
-      sh_chroot_job "Removing package from Root-remove: $pkg" "pacman -Rns $pkg --noconfirm" "$err_not_fatal"
-    done
+    mapfile -t aPackagesRoot_remove < "$dir_install/etc/Root-remove"
+    if [[ ${#aPackagesRoot_remove[@]} -gt 0 ]]; then
+      for pkg in "${aPackagesRoot_remove[@]}"; do
+        sh_chroot_job "Removing package from Root-remove: $pkg" "pacman -Rns $pkg --noconfirm" "$err_not_fatal"
+      done
+    fi
   fi
 
   aFilesToRemove=("$dir_install/*.txt"
@@ -1539,9 +1543,9 @@ sh_install_remove_packages() {
     "$dir_install/etc/Root-remove"
     )
 
-  for file in ${aFilesToRemove[@]}; do
-    if [[ -e "$file" ]]; then
-      sh_cmd_job "Removendo arquivos absoletos =>" "rm -f $file" "$err_not_fatal"
+  for cfile in ${aFilesToRemove[@]}; do
+    if [[ -e "$cfile" ]]; then
+      sh_cmd_job "Removendo arquivos absoletos =>" "rm -f $cfile" "$err_not_fatal"
     fi
   done
 }
