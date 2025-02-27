@@ -1431,13 +1431,13 @@ sh_initrd_adjust() {
 	local newtext="HOOKS=(base udev memdisk autodetect modconf block filesystems keyboard fsck)"
 
 	if [[ "$BOOT" == "arch" ]]; then
-		mensagem "Aguarde, ajustando e gerando initrd"
+		mensagem "Aguarde, ajustando e gerando initramfs"
 		#	sed -i '/#HOOKS=/a $newtext' "$dir_install/etc/mkinitcpio.conf"
 		#	sed -i -E 's/memdisk/autodetect/'"$dir_install/etc/mkinitcpio.conf"
 		# sed -i -E 's/archiso?.*?\s//' "$dir_install/etc/mkinitcpio.conf"
 		sed -i 's/HOOKS/#HOOKS/g' "$dir_install/etc/mkinitcpio.conf" >/dev/null 2>&1
 		echo "$newtext" >>"$dir_install/etc/mkinitcpio.conf" >/dev/null 2>&1
-		sh_chroot_job "Aguarde, ajustando e gerando initrd" "mkinitcpio -P"
+		sh_chroot_job "Aguarde, ajustando e gerando initramfs" "mkinitcpio -P"
 	fi
 }
 
@@ -5102,7 +5102,7 @@ sh_copyfilesboot() {
 		bootmnt="/boot"
 		#airootfs="/run/miso/bootmnt/boot"
 		sh_cmd_job "Aguarde, copiando kernel e initrd" "cp -Rpva $bootmnt/* $dir_install/boot/" "$err_not_fatal"
-		sh_chroot_job "Aguarde, gerando initrd" "mkinitcpio -P" "$err_not_fatal"
+		sh_chroot_job "Aguarde, gerando initramfs" "mkinitcpio -P" "$err_not_fatal"
 		sh_chroot_job "Aguarde, atualizando grub" "update-grub" "$err_not_fatal"
 		return 0
 	fi
@@ -5121,8 +5121,8 @@ sh_copyfilesboot() {
 			local krn_version=$(file $krn_file | grep -oP '(?<=version\s)\S+')
 			sh_cmd_job "Aguarde, copiando arquivos do kernel e initrd" "cp -Rpva $bootmnt/boot/* $dir_install/boot/" "$err_not_fatal"
 			sh_cmd_job "Aguarde, copiando kernel" "install -m 644 -o root $krn_file $dir_install/boot/vmlinuz-$krn_version" "$err_not_fatal"
-			sh_chroot_job "Aguarde, gerando initrd" "update-initramfs -d -c -u -k $krn_version" "$err_not_fatal"
-			sh_chroot_job "Aguarde, gerando initrd" "rm -rf /etc/default/grub.d/" "$err_not_fatal"
+			sh_chroot_job "Aguarde, gerando initrd pass 1" "update-initramfs -d -c -u -k $krn_version" "$err_not_fatal"
+			sh_chroot_job "Aguarde, gerando initrd pass 2" "rm -rf /etc/default/grub.d/" "$err_not_fatal"
 		fi
 	fi
 	return 0
