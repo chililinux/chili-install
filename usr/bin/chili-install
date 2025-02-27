@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: ter 25 fev 2025 23:13:48 -04
+#  Updated: qui 27 fev 2025 10:09:20 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -41,7 +41,7 @@ export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 shopt -s extglob # Habilita padrões estendidos
 
 declare -r _APP_="${0##*/}"
-declare -r _VERSION_="5.2.25.20250225"
+declare -r _VERSION_="5.2.27.20250227"
 declare -i quiet=0
 declare -i grafico=1
 declare -i ncounter=0
@@ -1548,20 +1548,32 @@ sh_mkefiroaming() {
 	return 0
 }
 
+sh_insert_in_chroot_installer() {
+  sed -i '/^IN_CHROOT_INSTALLER=/!s#$#\nIN_CHROOT_INSTALLER=true#' "$dir_install"/etc/environment
+}
+
+sh_remove_in_chroot_installer() {
+  sed -i '/^IN_CHROOT_INSTALLER=/d' "$dir_install"/etc/environment
+}
+
 sh_install_hyprland() {
   local aPackagesToInstall=('comm-hyprland')
 
+  sh_insert_in_chroot_installer
   for pkg in ${aPackagesToInstall[@]}; do
     sh_chroot_job "Aguarde, instalando meta pacote: $pkg" "pacman -S $pkg --noconfirm --overwrite \*" "$err_not_fatal"
   done
+  sh_remove_in_chroot_installer
 }
 
 sh_install_windowmaker() {
   local aPackagesToInstall=('comm-wmaker')
 
+  sh_insert_in_chroot_installer
   for pkg in ${aPackagesToInstall[@]}; do
     sh_chroot_job "Aguarde, instalando meta package: $pkg" "pacman -S $pkg --noconfirm --overwrite \*" "$err_not_fatal"
   done
+  sh_remove_in_chroot_installer
 }
 
 sh_install_remove_packages() {
