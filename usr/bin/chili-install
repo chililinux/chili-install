@@ -1551,13 +1551,13 @@ sh_mkefiroaming() {
 sh_insert_in_chroot_installer() {
 	local cuser="${AsUser[cuser]}"
   sed -i '/^IN_CHROOT_INSTALLER=/!s#$#\nIN_CHROOT_INSTALLER=true#' "$dir_install"/etc/environment
-  sed -i '/^IN_CHROOT_INSTALLER_USER=/!s#$#\nIN_CHROOT_INSTALLER_USER=$cuser#' "$dir_install"/etc/environment
+  sed -i "/^IN_CHROOT_INSTALLER_USER=/!s#$#\nIN_CHROOT_INSTALLER_USER=${cuser}#" "$dir_install"/etc/environment
 }
 
 sh_remove_in_chroot_installer() {
 	local cuser="${AsUser[cuser]}"
   sed -i '/^IN_CHROOT_INSTALLER=/d' "$dir_install"/etc/environment
-  sed -i '/^IN_CHROOT_INSTALLER_USER=/!s#$#\nIN_CHROOT_INSTALLER_USER=$cuser#' "$dir_install"/etc/environment
+  sed -i "/^IN_CHROOT_INSTALLER_USER=/!s#$#\nIN_CHROOT_INSTALLER_USER=${cuser}#" "$dir_install"/etc/environment
 }
 
 sh_install_i3wm() {
