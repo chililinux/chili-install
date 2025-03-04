@@ -5429,22 +5429,25 @@ sh_checkUpdatePackages() {
 		  sh_msg_job "Reiniciando o script pela primeira vez..."
       touch "$TMP_FILE"
       exec "$0" "$@"
+    else
+      # se não atualizar então verifica dependencias
+      sh_checkDependencies
     fi
   fi
 }
 
 sh_check_internet() {
-  local url="https://chililinux.com"
-  local timeout=5  # Tempo limite em segundos
+  local url="8.8.8.8"  # Servidor DNS do Google, sempre online
+  local timeout=2      # Tempo limite reduzido para resposta rápida
   local pipe_test="1"
 
-  if sh_cmd_job "Aguarde 5s, testando internet..." \
-    "curl -s --head --request GET --max-time "$timeout" "$url" | grep -q '200 OK'" \
+  if sh_cmd_job "Testando conexão com a internet..." \
+    "ping -c 1 -W $timeout $url >/dev/null 2>&1" \
     "$err_not_fatal" "$pipe_test"; then
     return 0
   else
     if conf "** INTERNET **" \
-      "Parece que não há uma rota disponível para a internet. \n\n${AMARELO}Deseja configurar um wifi ?"; then
+      "Parece que não há uma rota disponível para a internet. \n\n${AMARELO}Deseja configurar um Wi-Fi?"; then
       bash chili-wifi-config
       return 0
     fi
@@ -5463,11 +5466,8 @@ sh_checkDependencies() {
       log_err "${red}Error${reset}: $(gettext "Não foi possível encontrar o comando") ${cyan}'$d'${reset} -> $(gettext "instalar pacote") ${cyan}"${PACKAGEDEP[$d]}"${reset}"
       missing+=("$d")
       errorFound=true
-    else
-      log_msg "Check: ${cyan}$d"
     fi
   done
-  sleep 0.3
 
   if $errorFound; then
     replicate '='
@@ -5803,7 +5803,6 @@ sh_setVarColors
 sh_checkroot
 sh_confDistro
 trap sh_trapErro 2 15
-sh_checkDependencies
 sh_check_internet
 sh_checkUpdatePackages
 sh_loadSavedConfig
