@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: ter 04 mar 2025 02:21:37 -04
+#  Updated: ter 04 mar 2025 19:39:50 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -1133,6 +1133,10 @@ sh_execcopia() {
 			#			sleep $INTERVALO
 		done
 	)
+
+  sh_cmd_job "Criando diretório: $dir_install/mnt" "mkdir -p $dir_install/mnt; chmod 1777 $dir_install/mnt" "$err_not_fatal"
+  sh_cmd_job "Criando diretório: $dir_install/tmp" "mkdir -p $dir_install/tmp; chmod 1777 $dir_install/tmp" "$err_not_fatal"
+
 	return 0
 }
 
