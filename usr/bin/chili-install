@@ -5425,7 +5425,7 @@ sh_setup_Packages() {
 sh_add_repo_into_pacman_conf() {
   CONF_FILE="/etc/pacman.conf"
 
-  sh_msg_job "Adding repositories to /etc/pacman.conf ..." \
+  sh_msg_job "Adding repositories to /etc/pacman.conf ..."
   add_repo() {
     local repo_name="$1"
     shift
@@ -5471,7 +5471,7 @@ sh_checkUpdatePackages() {
   if [[ ! -f "$TMP_FILE" ]]; then
     if conf "** UPDATE **" "É recomendado atualizar os utilitários antes da instalação. \n\n${AMARELO}Deseja proceder ?"; then
       sh_cmd_job "Aguarde alguns instantes, atualizando..." \
-        "pacman -Syu --needed --quiet --noconfirm ${PackagesToUpdate[@]}" \
+        "pacman -Sy --needed --quiet --noconfirm ${PackagesToUpdate[@]}" \
         "$err_not_fatal"
 		  sh_msg_job "Reiniciando o script pela primeira vez..."
       touch "$TMP_FILE"
