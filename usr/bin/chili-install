@@ -5456,23 +5456,22 @@ sh_add_repo_into_pacman_conf() {
   sh_msg_job "Repositories added (if they didn't already exist)."
 
   # Atualiza os repositórios
-  sh_cmd_job "Aguarde alguns instantes, atualizando..." \
-             "pacman -Sy &>/dev/null" \
-             "$err_not_fatal"
+  #sh_cmd_job "Aguarde alguns instantes, sincronizando repositorios..." \
+  #           "pacman -Sy &>/dev/null" \
+  #           "$err_not_fatal"
 }
 
 sh_checkUpdatePackages() {
   local TMP_FILE="/tmp/$(basename "$0").restarted"
-  local PackagesToUpdate=(chili-install chili-utils gitrepo comm-base-config)
+  local PackagesToUpdate=('chili-install' 'chili-utils' 'gitrepo' 'comm-base-config')
 
   # adiciona repositorios inexistentes no /etc/pacman.conf
   sh_add_repo_into_pacman_conf
 
   if [[ ! -f "$TMP_FILE" ]]; then
-    if conf "** UPDATE **" "É recomendado atualizar os utilitários antes da instalação. \n\n${AMARELO}Deseja proceder ?"; then
-      sh_cmd_job "Aguarde alguns instantes, atualizando..." \
-        "pacman -Sy --needed --noconfirm ${PackagesToUpdate[@]} --overwrite \*" \
-        "$err_not_fatal"
+    if conf "** UPDATE **" "É recomendado sincronizar e atualizar os utilitários antes da instalação. \n\n${AMARELO}Deseja proceder ?"; then
+      sh_msg_job "Aguarde alguns instantes, sincronizando e atualizando..."
+      pacman -Sy --needed --noconfirm "${PackagesToUpdate[@]}" --overwrite \* &>/dev/null
 		  sh_msg_job "Reiniciando o script pela primeira vez..."
       touch "$TMP_FILE"
       exec "$0" "$@"
