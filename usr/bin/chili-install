@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: qui 06 mar 2025 14:45:00 -04
+#  Updated: sex 07 mar 2025 23:33:37 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -41,7 +41,7 @@ export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 shopt -s extglob # Habilita padrões estendidos
 
 declare -r _APP_="${0##*/}"
-declare -r _VERSION_="5.3.6.20250306"
+declare -r _VERSION_="5.3.7.20250307"
 declare -i quiet=0
 declare -i grafico=1
 declare -i ncounter=0
@@ -2362,6 +2362,7 @@ sh_choosewm() {
 	aWm[enlightenment]="Enlightenment desktop shell"
 	aWm[hyprland]="A highly customizable dynamic tiling Wayland compositor"
 	aWm[i3wm]="i3 is a tiling window manager inspired by wmii"
+	aWm[lxqt]="The 'Lightweight Qt Desktop Environment'"
 	aWm[wmaker]="An X11 window manager with a NEXTSTEP look and feel"
 	#	aWm[awesome]="Awesome"
 	#	aWm[blackbox]="Blackbox"
@@ -2369,7 +2370,6 @@ sh_choosewm() {
 	#	aWm[dwm]="Dwm"
 	#	aWm[fluxbox]="Fluxbox"
 	#	aWm[lxde]="The 'Lightweight X11 Desktop Environment'"
-	#	aWm[lxqt]="The 'Lightweight Qt Desktop Environment'"
 	#	aWm[mate]="Mate"
 	#	aWm[openbox]="Openbox"
 	#	aWm[plasma]="Kde Plasma-Desktop"
@@ -2390,7 +2390,6 @@ sh_choosewm() {
 	#		blackbox "${aWm[blackbox]}" "${aFlag[blackbox]}" \
 	#		fluxbox "${aWm[fluxbox]}" "${aFlag[fluxbox]}" \
 	#		lxde "${aWm[lxde]}" "${aFlag[lxde]}" \
-	#		lxqt "${aWm[lxqt]}" "${aFlag[lxqt]}" \
 	#		mate "${aWm[mate]}" "${aFlag[mate]}" \
 	#		openbox "${aWm[openbox]}" "${aFlag[openbox]}" \
 	#		sway "${aWm[sway]}" "${aFlag[sway]}" \
@@ -2408,6 +2407,7 @@ sh_choosewm() {
 		enlightenment "${aWm[enlightenment]}" "${aFlag[enlightenment]}" \
 		hyprland "${aWm[hyprland]}" "${aFlag[hyprland]}" \
 		i3wm "${aWm[i3wm]}" "${aFlag[i3wm]}" \
+    lxqt "${aWm[lxqt]}" "${aFlag[lxqt]}" \
 		wmaker "${aWm[wmaker]}" "${aFlag[wmaker]}" \
 		2>&1 >/dev/tty)
 
@@ -5582,6 +5582,7 @@ sh_install_wm() {
 		"hyprland") _WM_TO_INSTALL+=(comm-hyprland) ;;
 		"i3wm") _WM_TO_INSTALL+=(comm-i3wm) ;;
 		"wmaker") _WM_TO_INSTALL+=(comm-wmaker) ;;
+		"lxqt") _WM_TO_INSTALL+=(comm-lxqt);;
 		"awesome") ;;
 		"bspwm") ;;
 		"blackbox") ;;
@@ -5592,7 +5593,6 @@ sh_install_wm() {
 		"twm") ;;
 		"mate") ;;
 		"lxde") ;;
-		"lxqt") ;;
 		esac
 	done
 	sh_install_all_wm
