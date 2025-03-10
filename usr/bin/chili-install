@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: seg 10 mar 2025 00:43:39 -04
+#  Updated: seg 10 mar 2025 08:19:26 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -1884,6 +1884,27 @@ sh_install_all_wm() {
 	sh_remove_in_chroot_installer
 }
 
+# Função para instalação do pacote sem executar hook do mesmo
+sh_install_package_no_exec_hook() {
+	local PACKAGE_NAME="$1"
+	sudo pacman -Sw "$PACKAGE_NAME" 1>/dev/null
+
+	# Seleciona o pacote mais recente no cache
+	local PACKAGE=$(ls -1t /var/cache/pacman/pkg/"$PACKAGE_NAME"-*.pkg.tar.* | head -n 1)
+	if [ -z "$PACKAGE" ]; then
+		return 1
+	fi
+
+	# Cria um diretório temporário para extrair o pacote
+	local TMP_DIR=$(mktemp -d /tmp/"$PACKAGE_NAME"-extract-XXXXXX)
+	bsdtar -xf "$PACKAGE" -C "$TMP_DIR"
+
+	# Copia os arquivos extraídos para o sistema, excluindo metadados desnecessários
+	rsync -av --exclude='.BUILDINFO' --exclude='.INSTALL' --exclude='.MTREE' --exclude='.PKGINFO' "$TMP_DIR"/ / 1>/dev/null
+	rm -rf "$TMP_DIR"
+	return 0
+}
+
 sh_install_remove_packages() {
 	#  local aPackagesToRemove=('manjaro-live-systemd' 'community-livecd-key')
 	#  local aPackagesToInstall=('biglinux-systemd-swap')
@@ -1905,7 +1926,8 @@ sh_install_remove_packages() {
 		mapfile -t aPackagesRoot_install <"$dir_install/etc/Root-install"
 		if [[ ${#aPackagesRoot_install[@]} -gt 0 ]]; then
 			for pkg in "${aPackagesRoot_install[@]}"; do
-				sh_chroot_job "Installing package from Root-install: $pkg" "pacman -S $pkg --noconfirm" "$err_not_fatal"
+#				sh_chroot_job "Installing package from Root-install: $pkg" "pacman -S $pkg --noconfirm" "$err_not_fatal"
+				sh_chroot_job "Installing package from Root-install without exec hooks: $pkg" "$(declare -f sh_install_package_no_exec_hook); sh_install_package_no_exec_hook ${pkg}"  "$err_not_fatal"
 			done
 		fi
 	fi
