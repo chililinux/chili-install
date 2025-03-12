@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: qua 12 mar 2025 01:55:10 -04
+#  Updated: qua 12 mar 2025 13:09:34 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -1776,7 +1776,11 @@ nvidia_drm.modeset=1 \
 DEEPIN_GFXMODE= \
 module_blacklist=")
 
-WindowManager="${_WINDOWMANAGER//tty /}"
+WindowManager="${_WINDOWMANAGER[@]}"   # Converte array para string
+WindowManager="${WindowManager//tty/}" # Remove 'tty'
+WindowManager="${WindowManager//  / }" # Substitui espaços duplos por um único
+WindowManager="${WindowManager#"${WindowManager%%[![:space:]]*}"}" # Remove espaços à esquerda
+WindowManager="${WindowManager%"${WindowManager##*[![:space:]]}"}" # Remove espaços à direita
 GRUB_DISTRIBUTOR="${xdistro^} ${WindowManager^}"
 
 	#	cat << EOF > "$fileconf"
