@@ -1730,6 +1730,7 @@ sh_initrd_adjust() {
 }
 
 sh_grubinstall() {
+  local WindowManager
 	local fileconf="$dir_install/etc/default/grub"
 	local GRUB_CMDLINE_LINUX_DEFAULT=$(printf "%s" "\
 splash \
@@ -1775,12 +1776,15 @@ nvidia_drm.modeset=1 \
 DEEPIN_GFXMODE= \
 module_blacklist=")
 
+WindowManager="${_WINDOWMANAGER//tty /}"
+GRUB_DISTRIBUTOR="${xdistro^} ${WindowManager^}"
+
 	#	cat << EOF > "$fileconf"
 	cat >"$fileconf" <<EOF
 # Begin /etc/default/grub
 GRUB_DEFAULT=saved
 GRUB_TIMEOUT=5
-GRUB_DISTRIBUTOR="${xdistro^} ${_WINDOWMANAGER//tty /}"
+GRUB_DISTRIBUTOR="${GRUB_DISTRIBUTOR}"
 GRUB_TIMEOUT_STYLE=menu
 #GRUB_CMDLINE_LINUX_DEFAULT="splash loglevel=4 libata.noacpi=1 acpi=force apm=power-off nowatchdog tsc=nowatchdog cryptomgr.notests no_timer_check rcupdate.rcu_expedited=1 nouveau.modeset=1 rw nosoftlockup audit=0 nomce skew_tick=1 intremap=off intel_pstate=active amd_pstate=passive cpuidle.governor=teo split_lock_detect=off clearcpuid=514 transparent_hugepage=never loglevel=3 systemd.show_status=auto rd.udev.log_level=3 apparmor=1 security=apparmor vconsole.font=Uni2-Fixed16 intel_iommu=on tdx=on nvme_load=yes"
 GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT"
