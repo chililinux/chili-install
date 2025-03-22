@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: dom 16 mar 2025 01:57:07 -04
+#  Updated: sáb 22 mar 2025 13:30:18 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -41,7 +41,7 @@ export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 shopt -s extglob # Habilita padrões estendidos
 
 declare -r _APP_="${0##*/}"
-declare -r _VERSION_="5.3.16.20250316"
+declare -r _VERSION_="5.3.22.20250322"
 declare -i quiet=0
 declare -i grafico=1
 declare -i ncounter=0
@@ -5722,7 +5722,8 @@ sh_checkUpdatePackages() {
 	if [[ ! -f "$TMP_FILE" ]]; then
 		if conf "** UPDATE **" "É recomendado sincronizar e atualizar os utilitários antes da instalação. \n\n${AMARELO}Deseja proceder ?"; then
 			sh_msg_job "Aguarde alguns instantes, sincronizando e atualizando..."
-			pacman -Sy --needed --noconfirm "${PackagesToUpdate[@]}" --overwrite \* &>/dev/null
+#			pacman -Sy --needed --noconfirm "${PackagesToUpdate[@]}" --overwrite \* &>/dev/null
+			pacman -Syu --needed --noconfirm --overwrite \* 1>/dev/null
 			sh_msg_job "Reiniciando o script pela primeira vez..."
 			touch "$TMP_FILE"
 			exec "$0" "$@"
@@ -5910,7 +5911,7 @@ sh_install() {
 	sh_update_keymap
 	sh_update_Xkeymap
 	sh_update_timezone
-	sh_tuning_tcp
+#	sh_tuning_tcp
 	sh_change_pam_d
 	sh_install_remove_packages
 	if $isArchLike && $liveOS; then
