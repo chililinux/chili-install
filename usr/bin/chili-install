@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: sáb 22 mar 2025 13:30:18 -04
+#  Updated: dom 23 mar 2025 01:39:05 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -41,7 +41,7 @@ export PS4=$'${red}${0##*/}${green}[$FUNCNAME]${pink}[$LINENO]${reset} '
 shopt -s extglob # Habilita padrões estendidos
 
 declare -r _APP_="${0##*/}"
-declare -r _VERSION_="5.3.22.20250322"
+declare -r _VERSION_="5.3.23.20250323"
 declare -i quiet=0
 declare -i grafico=1
 declare -i ncounter=0
@@ -2602,7 +2602,7 @@ sh_choosewm() {
 
 	if [[ "$_SOURCE" = "local" ]]; then
 		alerta "$ccabec" "Instalação escolhida foi via local/ISO, não é necessário alterar nada aqui"
-		_WINDOWMANAGER='tty'
+		_WINDOWMANAGER=('tty')
 		LWM=$true
 		return
 	fi
@@ -2634,6 +2634,7 @@ sh_choosewm() {
 		aFlag[$x]='on'
 	done
 
+  #		tty "${aWm[tty]}" "${aFlag[tty]}" \
 	#		awesome "${aWm[awesome]}" "${aFlag[awesome]}" \
 	#		bspwm "${aWm[bspwm]}" "${aFlag[bspwm]}" \
 	#		dwm "${aWm[dwm]}" "${aFlag[dwm]}" \
@@ -2652,7 +2653,6 @@ sh_choosewm() {
 		--ok-label "${cmsg_Aceitar[$LC_DEFAULT]}" \
 		--checklist "${cmsg_LBL_check[$LC_DEFAULT]}" \
 		0 0 0 \
-		tty "${aWm[tty]}" "${aFlag[tty]}" \
 		enlightenment "${aWm[enlightenment]}" "${aFlag[enlightenment]}" \
 		hyprland "${aWm[hyprland]}" "${aFlag[hyprland]}" \
 		i3wm "${aWm[i3wm]}" "${aFlag[i3wm]}" \
@@ -2676,7 +2676,8 @@ sh_choosewm() {
 	#	else
 	#		LCUSTOM=false
 	#	fi
-	_WINDOWMANAGER=($(strtoarray "$wm"))
+	_WINDOWMANAGER=('tty')
+	_WINDOWMANAGER+=($(strtoarray "$wm"))
 	if grep -qi hyprland <<<"${_WINDOWMANAGER[@]}"; then
 		HYPRLAND=$true
 	fi
@@ -5877,9 +5878,9 @@ sh_install() {
 	fi
 	grafico=$oldgrafico
 	sh_disk_part_info
-	if ! ((LVM)); then
-		notconf "*** LVM ***" "\n\n${BOLD}${WHITE}Configurar LVM ?" || { sh_confLvm || sh_cancelLiveInstall "$@"; }
-	fi
+#	if ! ((LVM)); then
+#		notconf "*** LVM ***" "\n\n${BOLD}${WHITE}Configurar LVM ?" || { sh_confLvm || sh_cancelLiveInstall "$@"; }
+#	fi
 	if ! ((LGRUB)); then
 		notconf "*** BOOTLOADER ***" "${cmsg_LayoutAtual[$LC_DEFAULT]}:\n\n" \
 			"Bootloader : (${_DISKTABLE}) : ${RED}${AConfDisk[_BOOTLOADER]} | $(sh_splitarray "${AARRAY_DSK_DEVICES[$_BOOTLOADER]}" 2) | $(sh_splitarray "${AARRAY_DSK_DEVICES[$_BOOTLOADER]}" 4)${RESET}" \
