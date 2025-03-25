@@ -1,3 +1,3 @@
 # chili-install
 
-Instalador para o Chili Linux
+Instalador TUI guiado/automatizado para Linux
