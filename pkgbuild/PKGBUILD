@@ -2,7 +2,6 @@
 
 pkgname=chili-install
 pkgdesc="Instalador TUI guiado/automatizado para Linux"
-depends=(gawk coreutils dialog grep util-linux parted sed ncurses pv libnewt which)
 pkgver=$(date +%Y%m%d)
 pkgrel=$(date +%H%M)
 arch=('any')
@@ -10,6 +9,20 @@ license=('MIT')
 url="https://github.com/chililinux/${pkgname}"
 source=("git+${url}.git")
 md5sums=('SKIP')
+depends=()
+ooptdepends=(
+	dialog
+	pv
+	libnewt
+	ncurses
+	sed
+	grep
+	gawk
+	coreutils
+	util-linux
+	parted
+	which
+)
 
 # Automatically detect and use the correct install file
 if [ -e "${pkgname}.install" ]; then
@@ -20,6 +33,17 @@ fi
 
 package() {
 	cd "${srcdir}/${pkgname}"
+
+	install -dm755 "${pkgdir}/usr/share/${pkgname}"
+	printf "%s\n" "${optdepends[@]}" >"${pkgdir}/usr/share/${pkgname}/optdepends"
+
+	# Copiar a estrutura de /etc, /usr e /opt para /usr/share/${pkgname}
+	local dirs=("usr" "etc" "opt")
+	for dir in "${dirs[@]}"; do
+		if [ -d "${srcdir}/${pkgname}/${dir}" ]; then
+			cp -a "${srcdir}/${pkgname}/${dir}" "${pkgdir}/usr/share/${pkgname}/"
+		fi
+	done
 
 	# Determine the correct source directory
 	if [ -d "${pkgname}" ]; then
