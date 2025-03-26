@@ -10,7 +10,7 @@ url="https://github.com/chililinux/${pkgname}"
 source=("git+${url}.git")
 md5sums=('SKIP')
 depends=()
-ooptdepends=(
+optdepends=(
 	dialog
 	pv
 	libnewt
