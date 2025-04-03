@@ -3131,7 +3131,7 @@ sh_make_fs() {
 		[jfs]="-f    -L ROOT"
 		[vfat]="-F32 -n EFI"
 		[reiserfs]="-f -l ROOT"
-		[reiser4]="-f -l ROOT"
+		[reiser4]="-f -L ROOT --discard --yes"
 	)
 
 	sh_check_util_fs
@@ -3579,7 +3579,7 @@ sh_make_fsLvm() {
 				[jfs]="-f    -L $label"
 				[vfat]="-F32 -n EFI"
 				[reiserfs]="-f   -l $label"
-				[reiser4]="-f   -l $label"
+				[reiser4]="-f   -L $label --discard --yes"
 			)
 			if [[ "$fstype" = "swap" ]]; then
 				mkswap "$_part" 2>&1 | tee -i -a "$BOOTLOG" >"$LOGGER"
