@@ -10,7 +10,7 @@
 #
 #  Created: 2019/04/05 - 23:02 -04
 #  Altered: 2024/12/09 - 01:56 -04
-#  Updated: qui 03 abr 2025 02:18:06 -04
+#  Updated: qui 03 abr 2025 07:12:15 -04
 #
 #  Copyright (c) 2019-2025, Vilmar Catafesta <vcatafesta@gmail.com>
 #
@@ -3131,6 +3131,7 @@ sh_make_fs() {
 		[jfs]="-f    -L ROOT"
 		[vfat]="-F32 -n EFI"
 		[reiserfs]="-f -l ROOT"
+		[reiser4fs]="-f -l ROOT"
 	)
 
 	sh_check_util_fs
@@ -3578,6 +3579,7 @@ sh_make_fsLvm() {
 				[jfs]="-f    -L $label"
 				[vfat]="-F32 -n EFI"
 				[reiserfs]="-f   -l $label"
+				[reiser4fs]="-f   -l $label"
 			)
 			if [[ "$fstype" = "swap" ]]; then
 				mkswap "$_part" 2>&1 | tee -i -a "$BOOTLOG" >"$LOGGER"
@@ -3964,6 +3966,7 @@ sh_choosefstype() {
 
 	Afs[xfs]="SGI's XFS"
 	Afs[reiserfs]="Linux Reiserfs"
+	Afs[reiser4fs]="Linux Reiser4fs"
 	Afs[jfs]="Linux Jfs"
 	Afs[f2fs]="Flash-Friendly Filesystem"
 	Afs[ext3]="Linux ext3 (journal)"
@@ -4091,6 +4094,7 @@ sh_make_fstab() {
 				"$fstype" = "btrfs" ||
 				"$fstype" = "xfs" ||
 				"$fstype" = "reiserfs" ||
+				"$fstype" = "reiser4fs" ||
 				"$fstype" = "ntfs" ||
 				"$fstype" = "exfat" ]]; then
 				fsorder=0
