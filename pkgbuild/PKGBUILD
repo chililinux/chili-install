@@ -20,8 +20,31 @@ optdepends=(
 	gawk
 	coreutils
 	util-linux
+	findutils
 	parted
 	which
+  gettext
+  curl
+  btrfs-progs
+  xfsprogs
+  dosfstools
+  e2fsprogs
+  exfatprogs        # exFAT filesystem userspace utilities for the Linux Kernel exfat driver
+  f2fs-tools
+  jfsutils
+  reiserfsprogs
+  reiser4progs      # qui 03 abr 2025 07:12:15 -04 # Reiser4 filesystem programs
+  libaal            # qui 03 abr 2025 07:12:15 -04 # Reiser4 filesystem support library
+  nfs-utils
+  ntfs-3g
+  sysfsutils
+  ecryptfs-utils
+  cifs-utils
+  cryptsetup
+  lvm2
+  device-mapper
+  dmraid
+  mdadm
 )
 
 # Automatically detect and use the correct install file
